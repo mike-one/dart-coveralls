@@ -27,7 +27,7 @@ abstract class GitPerson {
     var mailCandidate = new RegExp(r"<(.*?)>").firstMatch(str);
     if (null == mailCandidate) return "Unknown";
     var mail = mailCandidate.group(0);
-    return mail.substring(1, mail.length - 1);
+    return mail!.substring(1, mail.length - 1);
   }
 }
 
@@ -129,9 +129,9 @@ class GitBranch {
 
   static String getCurrentBranchName(Directory dir,
       {ProcessSystem processSystem: const ProcessSystem(),
-      Map<String, String> environment}) {
+      Map<String, String>? environment}) {
     if (null == environment) environment = Platform.environment;
-    if (null != environment["CI_BRANCH"]) return environment["CI_BRANCH"];
+    if (null != environment["CI_BRANCH"]) return environment["CI_BRANCH"]!;
 
     var travisBranch = travis.getBranch(environment);
     if (travisBranch != null) return travisBranch;

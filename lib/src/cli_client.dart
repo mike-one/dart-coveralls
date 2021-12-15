@@ -22,14 +22,14 @@ class CommandLineClient {
   CommandLineClient._(this.packagesPath, this.packageRoot, this.token);
 
   factory CommandLineClient(
-      {String packageRoot,
-      String packagesPath,
-      String token,
-      Map<String, String> environment}) {
-    return new CommandLineClient._(packagesPath, packageRoot, token);
+      {String? packageRoot,
+      String? packagesPath,
+      String? token,
+      Map<String, String>? environment}) {
+    return new CommandLineClient._(packagesPath!, packageRoot!, token!);
   }
 
-  Future<String> getLcovResult(String testFile,
+  Future<String?> getLcovResult(String testFile,
       {ProcessSystem processSystem: const ProcessSystem()}) {
     var collector = new LcovCollector(
         packageRoot: packageRoot,
@@ -42,24 +42,24 @@ class CommandLineClient {
   /// `COVERALLS_TOKEN` if one is set. Otherwise; `null`.
   ///
   /// If [environment] is `null`, [Platform.environment] is used.
-  static String getToken(String candidate, [Map<String, String> environment]) {
+  static String getToken(String? candidate, [Map<String, String>? environment]) {
     if (candidate != null && candidate.isNotEmpty) return candidate;
     if (null == environment) environment = Platform.environment;
 
-    candidate = environment["REPO_TOKEN"];
+    candidate = environment["REPO_TOKEN"]!;
     if (candidate != null) return candidate;
 
-    return environment['COVERALLS_TOKEN'];
+    return environment['COVERALLS_TOKEN']!;
   }
 
-  Future<CoverallsResult> reportToCoveralls(String testFile,
+  Future<CoverallsResult?> reportToCoveralls(String testFile,
       {ProcessSystem processSystem: const ProcessSystem(),
-      String coverallsAddress,
+      String? coverallsAddress,
       bool dryRun: false,
       bool throwOnConnectivityError: false,
       int retry: 0,
       bool excludeTestFiles: false,
-      bool printJson}) async {
+      bool? printJson}) async {
     var rawLcov = await getLcovResult(testFile, processSystem: processSystem);
 
     if (rawLcov == null) {
@@ -70,23 +70,23 @@ class CommandLineClient {
 
     return uploadToCoveralls(rawLcov,
         processSystem: processSystem,
-        coverallsAddress: coverallsAddress,
+        coverallsAddress: coverallsAddress!,
         dryRun: dryRun,
         throwOnConnectivityError: throwOnConnectivityError,
         retry: retry,
         excludeTestFiles: excludeTestFiles,
-        printJson: printJson);
+        printJson: printJson!);
   }
 
-  Future<CoverallsResult> convertAndUploadToCoveralls(
+  Future<CoverallsResult?> convertAndUploadToCoveralls(
       Directory containsVmReports,
       {ProcessSystem processSystem: const ProcessSystem(),
-      String coverallsAddress,
+      String? coverallsAddress,
       bool dryRun: false,
       bool throwOnConnectivityError: false,
       int retry: 0,
       bool excludeTestFiles: false,
-      bool printJson}) async {
+      bool? printJson}) async {
     var collector = new LcovCollector(
         packageRoot: packageRoot,
         packagesPath: packagesPath,
@@ -100,17 +100,17 @@ class CommandLineClient {
         throwOnConnectivityError: throwOnConnectivityError,
         retry: retry,
         excludeTestFiles: excludeTestFiles,
-        printJson: printJson);
+        printJson: printJson!);
   }
 
-  Future<CoverallsResult> uploadToCoveralls(String coverageResult,
+  Future<CoverallsResult?> uploadToCoveralls(String coverageResult,
       {ProcessSystem processSystem: const ProcessSystem(),
-      String coverallsAddress,
+      String? coverallsAddress,
       bool dryRun: false,
       bool throwOnConnectivityError: false,
       int retry: 0,
       bool excludeTestFiles: false,
-      bool printJson}) async {
+      bool? printJson}) async {
     var lcov = LcovDocument.parse(coverageResult);
 
     var serviceName = travis.getServiceName(Platform.environment);
@@ -121,7 +121,7 @@ class CommandLineClient {
         serviceName: serviceName,
         serviceJobId: serviceJobId);
 
-    if (printJson) {
+    if (printJson!) {
       print(const JsonEncoder.withIndent('  ').convert(report));
     }
 

@@ -195,7 +195,7 @@ class Coverage {
 /// A [LineValue] represents a single line in an LCOV-File
 class LineValue {
   final int lineNumber;
-  final int lineCount;
+  final int? lineCount;
 
   /// Instantiates a [LineValue] with the given line number and line count
   LineValue(this.lineNumber, this.lineCount);
@@ -242,15 +242,15 @@ class CoverallsReport {
   final String repoToken;
   final GitData gitData;
   final SourceFileReports sourceFileReports;
-  final String serviceName;
-  final String serviceJobId;
+  final String? serviceName;
+  final String? serviceJobId;
 
   CoverallsReport(this.repoToken, this.sourceFileReports, this.gitData,
       {this.serviceName, this.serviceJobId});
 
   static CoverallsReport parse(
       String repoToken, LcovDocument lcov, String projectDirectory,
-      {String serviceName, String serviceJobId, bool excludeTestFiles: false}) {
+      {String? serviceName, String? serviceJobId, bool excludeTestFiles: false}) {
     var gitData =
         GitData.getGitData(const LocalFileSystem().directory(projectDirectory));
     var reports = SourceFileReports.parse(lcov, projectDirectory,

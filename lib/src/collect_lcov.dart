@@ -37,7 +37,7 @@ class LcovPart {
     var firstLineEnd = lcovPart.indexOf("\n");
     var heading = lcovPart.substring(0, firstLineEnd);
 
-    var end = lcovPart.indexOf("\nend_of_record");
+    int? end = lcovPart.indexOf("\nend_of_record");
     if (-1 == end) end = null; // If "end_of_record" is missing, take rest
     var content =
         lcovPart.substring(firstLineEnd + 1, end); // Skip newline symbol
@@ -51,9 +51,9 @@ class LcovPart {
 }
 
 class LcovCollector {
-  final String sdkRoot;
-  final String packageRoot;
-  final String packagesPath;
+  final String? sdkRoot;
+  final String? packageRoot;
+  final String? packagesPath;
   final ProcessSystem processSystem;
 
   LcovCollector(
@@ -68,14 +68,14 @@ class LcovCollector {
         .list(recursive: false, followLinks: false)
         .toList();
 
-    var hitmap = await parseCoverage(reportFiles as Iterable<File>, null);
+    var hitmap = await parseCoverage(reportFiles as Iterable<File>, 0);
     return await _formatCoverageJson(hitmap);
   }
 
   /// Returns an LCOV string of the tested [File].
   ///
   /// Calculates and returns LCOV information of the tested [File].
-  Future<String> getLcovInformation(String testFile) async {
+  Future<String?> getLcovInformation(String testFile) async {
     if (!p.isAbsolute(testFile)) {
       throw new ArgumentError.value(
           testFile, 'testFile', 'Must be an absolute path.');
@@ -87,15 +87,15 @@ class LcovCollector {
     }
 
     Map<String, Map<int, int>> hitmap = {};
-    mergeHitmaps(createHitmap(reportFile), hitmap);
+    mergeHitmaps(await createHitmap(reportFile), hitmap);
     return await _formatCoverageJson(hitmap);
   }
 
   /// Formats coverage hitmap json to an lcov string
-  Future<String> _formatCoverageJson(Map<dynamic, dynamic> hitmap) {
+  Future<String> _formatCoverageJson(Map<String, Map<int, int>> hitmap) {
     var resolver;
     if (packageRoot != null) {
-      resolver = new Resolver(packageRoot: packageRoot, sdkRoot: sdkRoot);
+      resolver = new Resolver(packagesPath: packageRoot!, sdkRoot: sdkRoot);
     } else {
       resolver = new Resolver(packagesPath: packagesPath, sdkRoot: sdkRoot);
     }
@@ -104,7 +104,7 @@ class LcovCollector {
   }
 
   /// Generates and returns a coverage json file
-  Future<List<Map<String, dynamic>>> _getCoverageJson(String testFile) async {
+  Future<List<Map<String, dynamic>>?> _getCoverageJson(String testFile) async {
     bool terminated = false;
 
     var dartArgs = ["--pause-isolates-on-exit", "--enable-vm-service"];
@@ -126,7 +126,7 @@ class LcovCollector {
 
     Completer<Uri> hostCompleter = new Completer<Uri>();
     process.stdout.transform(utf8.decoder).listen((data) {
-      Uri uri = util.extractObservatoryUri(data);
+      Uri? uri = util.extractObservatoryUri(data);
       if (uri != null) {
         hostCompleter.complete(uri);
       }
@@ -135,7 +135,12 @@ class LcovCollector {
 
     try {
       Map<String, dynamic> coverageResults =
-          await collect(host, true, true, timeout: new Duration(seconds: 60));
+          /* the api had version 0.12.4: The method was:
+      collect(Uri serviceUri, bool resume, bool waitPaused,
+    {Duration timeout})
+     */
+          await collect(host, true, true, true, null,
+              timeout: new Duration(seconds: 60));
       return coverageResults['coverage'];
     } catch (e) {
       print(e);

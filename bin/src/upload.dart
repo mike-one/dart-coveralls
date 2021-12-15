@@ -11,10 +11,10 @@ import 'command_line.dart';
 class UploadPart extends CommandLinePart {
   UploadPart() : super(_initializeParser());
 
-  Future execute(ArgResults res) async {
-    if (res["help"]) return print(parser.usage);
+  Future execute(ArgResults? res) async {
+    if (res!["help"]) return print(parser.usage);
 
-    if (handleLogging(res) == false) {
+    if (handleLogging(res!) == false) {
       return null;
     }
 
